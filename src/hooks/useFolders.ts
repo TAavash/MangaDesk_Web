@@ -1,1 +1,11 @@
-{"code":"rate-limited","message":"You have hit the rate limit. Please upgrade to keep chatting.","providerLimitHit":false,"isRetryable":true}
+import { useState, useEffect } from "react";
+
+export function useFolders() {
+  const [folders, setFolders] = useState<string[]>([]);
+
+  useEffect(() => {
+    // fetch or load folders here
+  }, []);
+
+  return { folders, setFolders };
+}
