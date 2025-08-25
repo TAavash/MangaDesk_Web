@@ -1,0 +1,579 @@
+import React, { useState } from 'react';
+import { ArrowLeft, Star, Edit3, Trash2, Plus, Minus, Heart, Calendar, Tag, Globe, Building2, RotateCcw, Check } from 'lucide-react';
+import { Button } from '../../components/ui/button';
+import { StatusBar } from '../../components/StatusBar/StatusBar';
+import { Card, CardContent } from '../../components/ui/card';
+import { useBooks } from '../../hooks/useBooks';
+import { useAuth } from '../../hooks/useAuth';
+
+interface BookDetailProps {
+  bookId: string;
+  folderId: string;
+  onBack: () => void;
+}
+
+export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack }) => {
+  const { user } = useAuth();
+  const { getBook, updateBook, deleteBook } = useBooks(folderId);
+  const book = getBook(bookId);
+  
+  const [isEditing, setIsEditing] = useState(false);
+  const [isEditingProgress, setIsEditingProgress] = useState(false);
+  const [isEditingTotal, setIsEditingTotal] = useState(false);
+  const [tempProgress, setTempProgress] = useState(book?.progress.toString() || '0');
+  const [tempTotal, setTempTotal] = useState(book?.totalChapters.toString() || '1');
+
+  if (!book) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Book not found</p>
+          <Button onClick={onBack} className="mt-4">
+            Go Back
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const updateProgress = (change: number) => {
+    const newProgress = Math.max(0, Math.min(book.totalChapters, book.progress + change));
+    const updates = { 
+      progress: newProgress,
+      lastRead: new Date().toISOString().split('T')[0]
+    };
+    updateBook(book.id, updates);
+  };
+
+  const updateStatus = (newStatus: typeof book.status) => {
+    const updates: any = { status: newStatus };
+    
+    // Set finish date if completed
+    if (newStatus === 'completed') {
+      updates.finishDate = new Date().toISOString().split('T')[0];
+      updates.progress = book.totalChapters;
+    }
+    
+    updateBook(book.id, updates);
+  };
+
+  const handleProgressEdit = () => {
+    setTempProgress(book.progress.toString());
+    setIsEditingProgress(true);
+  };
+
+  const handleTotalEdit = () => {
+    setTempTotal(book.totalChapters.toString());
+    setIsEditingTotal(true);
+  };
+
+  const saveProgress = () => {
+    const newProgress = parseInt(tempProgress) || 0;
+    const validProgress = Math.max(0, Math.min(book.totalChapters, newProgress));
+    updateBook(book.id, { 
+      progress: validProgress,
+      lastRead: new Date().toISOString().split('T')[0]
+    });
+    setTempProgress(validProgress.toString());
+    setIsEditingProgress(false);
+  };
+
+  const saveTotal = () => {
+    const newTotal = parseInt(tempTotal) || 1;
+    const validTotal = Math.max(1, newTotal);
+    const adjustedProgress = Math.min(book.progress, validTotal);
+    updateBook(book.id, {
+      totalChapters: validTotal,
+      progress: adjustedProgress
+    });
+    setTempTotal(validTotal.toString());
+    setIsEditingTotal(false);
+  };
+
+  const cancelProgressEdit = () => {
+    setTempProgress(book.progress.toString());
+    setIsEditingProgress(false);
+  };
+
+  const cancelTotalEdit = () => {
+    setTempTotal(book.totalChapters.toString());
+    setIsEditingTotal(false);
+  };
+
+  const handleProgressKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      saveProgress();
+    } else if (e.key === 'Escape') {
+      cancelProgressEdit();
+    }
+  };
+
+  const handleTotalKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      saveTotal();
+    } else if (e.key === 'Escape') {
+      cancelTotalEdit();
+    }
+  };
+
+  const handleSliderChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newProgress = parseInt(e.target.value);
+    updateBook(book.id, { 
+      progress: newProgress,
+      lastRead: new Date().toISOString().split('T')[0]
+    });
+  };
+
+  const toggleFavorite = () => {
+    updateBook(book.id, { favorite: !book.favorite });
+  };
+
+  const handleDelete = async () => {
+    if (window.confirm('Are you sure you want to delete this book?')) {
+      await deleteBook(book.id);
+      onBack();
+    }
+  };
+
+  const handleNotesChange = (notes: string) => {
+    updateBook(book.id, { notes });
+  };
+
+  const progressPercentage = Math.round((book.progress / book.totalChapters) * 100);
+
+  const statusOptions = [
+    { value: 'reading', label: 'Reading', color: 'bg-blue-500' },
+    { value: 'completed', label: 'Completed', color: 'bg-green-500' },
+    { value: 'plan-to-read', label: 'Plan to Read', color: 'bg-yellow-500' },
+    { value: 'dropped', label: 'Dropped', color: 'bg-red-500' }
+  ];
+
+  return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden relative">
+        <StatusBar />
+
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-gray-100">
+          <div className="flex items-center justify-between">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={onBack}
+              className="h-8 w-8 p-0"
+            >
+              <ArrowLeft className="w-4 h-4" />
+            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={toggleFavorite}
+                className={`h-8 w-8 p-0 ${book.favorite ? 'text-red-500 hover:bg-red-50' : 'text-gray-400 hover:bg-gray-50'}`}
+              >
+                <Heart className={`w-4 h-4 ${book.favorite ? 'fill-current' : ''}`} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setIsEditing(!isEditing)}
+                className="h-8 w-8 p-0"
+              >
+                <Edit3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleDelete}
+                className="h-8 w-8 p-0 text-red-600 hover:bg-red-50"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Book Details */}
+        <div className="px-6 py-4 space-y-4 max-h-[500px] overflow-y-auto">
+          {/* Cover and Basic Info */}
+          <div className="flex gap-4">
+            <div className="w-20 h-28 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+              {book.coverUrl ? (
+                <img 
+                  src={book.coverUrl} 
+                  alt={book.title}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                  <span className="text-white font-bold">
+                    {book.title.charAt(0)}
+                  </span>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex-1">
+              <h1 className="text-xl font-bold text-gray-900 mb-1">{book.title}</h1>
+              <p className="text-gray-600 mb-2">{book.author}</p>
+              
+              {/* Rating */}
+              <div className="flex items-center gap-1 mb-2">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <Star
+                    key={star}
+                    className={`w-4 h-4 ${
+                      star <= book.rating 
+                        ? 'text-yellow-400 fill-current' 
+                        : 'text-gray-300'
+                    }`}
+                  />
+                ))}
+                <span className="text-sm text-gray-600 ml-1">{book.rating}/5</span>
+              </div>
+              
+              {/* Favorite indicator */}
+              {book.favorite && (
+                <div className="flex items-center gap-1">
+                  <Heart className="w-4 h-4 text-red-500 fill-current" />
+                  <span className="text-sm text-red-600 font-medium">Favorite</span>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Synopsis */}
+          {book.synopsis && (
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-gray-900 mb-2">Synopsis</h3>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {book.synopsis}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Book Information */}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Information</h3>
+              <div className="space-y-3">
+                {book.genre && book.genre.length > 0 && (
+                  <div className="flex items-start gap-2">
+                    <Tag className="w-4 h-4 text-gray-500 mt-0.5" />
+                    <div>
+                      <span className="text-sm font-medium text-gray-700">Genres:</span>
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {book.genre.map((g, index) => (
+                          <span key={index} className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full">
+                            {g}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {book.year && (
+                  <div className="flex items-center gap-2">
+                    <Calendar className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm text-gray-700">
+                      <span className="font-medium">Year:</span> {book.year}
+                    </span>
+                  </div>
+                )}
+
+                {book.publisher && (
+                  <div className="flex items-center gap-2">
+                    <Building2 className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm text-gray-700">
+                      <span className="font-medium">Publisher:</span> {book.publisher}
+                    </span>
+                  </div>
+                )}
+
+                {book.language && (
+                  <div className="flex items-center gap-2">
+                    <Globe className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm text-gray-700">
+                      <span className="font-medium">Language:</span> {book.language}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Tags */}
+          {book.tags && book.tags.length > 0 && (
+            <Card>
+              <CardContent className="p-4">
+                <h3 className="font-semibold text-gray-900 mb-3">Tags</h3>
+                <div className="flex flex-wrap gap-2">
+                  {book.tags.map((tag, index) => (
+                    <span key={index} className="px-3 py-1 bg-gray-100 text-gray-700 text-sm rounded-full">
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Status */}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Status</h3>
+              <div className="grid grid-cols-2 gap-2">
+                {statusOptions.map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => updateStatus(option.value as any)}
+                    className={`p-2 rounded-lg text-sm font-medium transition-colors ${
+                      book.status === option.value
+                        ? 'bg-blue-100 text-blue-700 border-2 border-blue-300'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${option.color}`} />
+                      {option.label}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Progress */}
+          <Card>
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="font-semibold text-gray-900">Reading Progress</h3>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => updateBook(book.id, { 
+                    progress: book.totalChapters,
+                    status: 'completed',
+                    finishDate: new Date().toISOString().split('T')[0]
+                  })}
+                  className="text-xs text-blue-600 hover:bg-blue-50"
+                >
+                  Mark Complete
+                </Button>
+              </div>
+              
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm text-gray-600">Chapter</span>
+                  {isEditingProgress ? (
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        value={tempProgress}
+                        onChange={(e) => setTempProgress(e.target.value)}
+                        onKeyDown={handleProgressKeyPress}
+                        className="w-16 px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        min="0"
+                        max={book.totalChapters}
+                        autoFocus
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={saveProgress}
+                        className="h-6 w-6 p-0 text-green-600 hover:bg-green-50"
+                      >
+                        <Check className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={cancelProgressEdit}
+                        className="h-6 w-6 p-0 text-gray-500 hover:bg-gray-50"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleProgressEdit}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-700 underline"
+                    >
+                      {book.progress}
+                    </button>
+                  )}
+                  <span className="text-sm text-gray-600">of</span>
+                  {isEditingTotal ? (
+                    <div className="flex items-center gap-1">
+                      <input
+                        type="number"
+                        value={tempTotal}
+                        onChange={(e) => setTempTotal(e.target.value)}
+                        onKeyDown={handleTotalKeyPress}
+                        className="w-16 px-2 py-1 text-sm border border-blue-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        min="1"
+                        autoFocus
+                      />
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={saveTotal}
+                        className="h-6 w-6 p-0 text-green-600 hover:bg-green-50"
+                      >
+                        <Check className="w-3 h-3" />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={cancelTotalEdit}
+                        className="h-6 w-6 p-0 text-gray-500 hover:bg-gray-50"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={handleTotalEdit}
+                      className="text-sm font-medium text-blue-600 hover:text-blue-700 underline"
+                    >
+                      {book.totalChapters}
+                    </button>
+                  )}
+                </div>
+                <span className="text-sm font-medium text-blue-600">
+                  {progressPercentage}%
+                </span>
+              </div>
+
+              {/* Combined draggable progress bar */}
+              <div className="mb-3">
+                <input
+                  type="range"
+                  min="0"
+                  max={book.totalChapters}
+                  value={book.progress}
+                  onChange={handleSliderChange}
+                  className="w-full h-3 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                />
+                <style jsx>{`
+                  .slider::-webkit-slider-thumb {
+                    appearance: none;
+                    height: 24px;
+                    width: 24px;
+                    border-radius: 50%;
+                    background: #3B82F6;
+                    cursor: pointer;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                  }
+                  .slider::-moz-range-thumb {
+                    height: 24px;
+                    width: 24px;
+                    border-radius: 50%;
+                    background: #3B82F6;
+                    cursor: pointer;
+                    border: none;
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+                  }
+                `}</style>
+              </div>
+
+              {/* Quick increment/decrement buttons */}
+              <div className="flex items-center justify-center gap-4 mb-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => updateProgress(-1)}
+                  disabled={book.progress <= 0}
+                  className="h-8 w-8 p-0"
+                >
+                  <Minus className="w-4 h-4" />
+                </Button>
+                
+                <span className="font-medium text-gray-900 min-w-[60px] text-center">
+                  {book.progress}
+                </span>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => updateProgress(1)}
+                  disabled={book.progress >= book.totalChapters}
+                  className="h-8 w-8 p-0"
+                >
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Notes */}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Notes</h3>
+              {isEditing ? (
+                <textarea
+                  value={book.notes}
+                  onChange={(e) => handleNotesChange(e.target.value)}
+                  className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  rows={4}
+                  placeholder="Add your thoughts about this book..."
+                />
+              ) : (
+                <p className="text-gray-700 text-sm leading-relaxed">
+                  {book.notes || 'No notes added yet.'}
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Metadata */}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-gray-900 mb-3">Reading History</h3>
+              <div className="space-y-2 text-sm">
+                {book.startDate && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Started Reading:</span>
+                    <span className="text-gray-900">
+                      {new Date(book.startDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                {book.finishDate && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Finished Reading:</span>
+                    <span className="text-gray-900">
+                      {new Date(book.finishDate).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+                <div className="flex justify-between">
+                  <span className="text-gray-600">Date Added:</span>
+                  <span className="text-gray-900">
+                    {new Date(book.dateAdded).toLocaleDateString()}
+                  </span>
+                </div>
+                {book.lastRead && (
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Last Read:</span>
+                    <span className="text-gray-900">
+                      {new Date(book.lastRead).toLocaleDateString()}
+                    </span>
+                  </div>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Home Indicator */}
+        <div className="flex justify-center py-2">
+          <div className="w-32 h-1 bg-black rounded-full" />
+        </div>
+      </div>
+    </div>
+  );
+};
