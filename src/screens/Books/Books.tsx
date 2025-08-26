@@ -112,9 +112,11 @@ export const Books: React.FC<BooksProps> = ({
             <div className="text-center py-12">
               <BookOpen className="w-12 h-12 text-gray-300 mx-auto mb-3" />
               <p className="text-gray-500 mb-4">No books in this folder yet</p>
-              <Button className="bg-blue-600 hover:bg-blue-700">
-                <Plus className="w-4 h-4 mr-2" />
+              <Button 
                 onClick={() => setShowAddModal(true)}
+                className="bg-blue-600 hover:bg-blue-700"
+              >
+                <Plus className="w-4 h-4 mr-2" />
                 Add Your First Book
               </Button>
             </div>

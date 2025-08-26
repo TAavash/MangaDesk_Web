@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTheme } from './hooks/useTheme';
 import { Auth } from './components/Auth';
 import { Folders } from './screens/Folders';
 import { Books } from './screens/Books';
@@ -8,6 +9,7 @@ import { useNavigation } from './hooks/useNavigation';
 import { useAuth } from './hooks/useAuth';
 
 export const App: React.FC = () => {
+  const { theme } = useTheme();
   const { user, loading } = useAuth();
   const {
     navigationState,
