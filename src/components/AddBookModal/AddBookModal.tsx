@@ -44,6 +44,44 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
   const [newTag, setNewTag] = useState('');
   const [isEditingProgress, setIsEditingProgress] = useState(false);
   const [tempProgress, setTempProgress] = useState('0');
+  const [uploading, setUploading] = useState(false);
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please select an image file');
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      // Convert to base64 for storage (in a real app, you'd upload to a service)
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const base64 = event.target?.result as string;
+        setFormData(prev => ({ ...prev, coverUrl: base64 }));
+        setUploading(false);
+      };
+      reader.onerror = () => {
+        alert('Error reading file');
+        setUploading(false);
+      };
+      reader.readAsDataURL(file);
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image');
+      setUploading(false);
+    }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -206,22 +244,30 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
               <label className="block text-sm font-medium text-gray-700 mb-1">
                 Cover Image URL
               </label>
-              <div className="flex gap-2">
+              <div className="space-y-2">
                 <input
                   type="url"
                   value={formData.coverUrl}
                   onChange={(e) => setFormData(prev => ({ ...prev, coverUrl: e.target.value }))}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   placeholder="https://example.com/cover.jpg"
                 />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  className="px-3 py-2"
-                >
-                  <Image className="w-4 h-4" />
-                </Button>
+                <div className="flex gap-2">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    id="cover-upload"
+                  />
+                  <label
+                    htmlFor="cover-upload"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm cursor-pointer hover:bg-gray-50 flex items-center justify-center gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Upload from Device
+                  </label>
+                </div>
               </div>
               {formData.coverUrl && (
                 <div className="mt-2 flex justify-center">
@@ -262,9 +308,22 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                 <input
                   type="number"
                   value={formData.totalChapters}
-                  onChange={(e) => setFormData(prev => ({ ...prev, totalChapters: Math.max(1, parseInt(e.target.value) || 1) }))}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (value === '') {
+                      setFormData(prev => ({ ...prev, totalChapters: '' as any }));
+                    } else {
+                      setFormData(prev => ({ ...prev, totalChapters: Math.max(1, parseInt(value) || 1) }));
+                    }
+                  }}
+                  onBlur={(e) => {
+                    if (e.target.value === '' || parseInt(e.target.value) < 1) {
+                      setFormData(prev => ({ ...prev, totalChapters: 1 }));
+                    }
+                  }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
                   min="1"
+                  placeholder="1"
                 />
               </div>
             </div>

@@ -5,6 +5,7 @@ import { Folders } from './screens/Folders';
 import { Books } from './screens/Books';
 import { BookDetail } from './screens/BookDetail';
 import { Settings } from './screens/Settings';
+import { Admin } from './screens/Admin';
 import { useNavigation } from './hooks/useNavigation';
 import { useAuth } from './hooks/useAuth';
 
@@ -17,6 +18,7 @@ export const App: React.FC = () => {
     navigateToBooks,
     navigateToBookDetail,
     navigateToSettings,
+    navigateToAdmin,
     goBack
   } = useNavigation();
 
@@ -42,6 +44,7 @@ export const App: React.FC = () => {
           <Folders
             onFolderClick={navigateToBooks}
             onSettingsClick={navigateToSettings}
+            onAdminClick={navigateToAdmin}
           />
         );
       
@@ -71,8 +74,15 @@ export const App: React.FC = () => {
           />
         );
       
+      case 'admin':
+        return (
+          <Admin
+            onBack={goBack}
+          />
+        );
+      
       default:
-        return <Folders onFolderClick={navigateToBooks} onSettingsClick={navigateToSettings} />;
+        return <Folders onFolderClick={navigateToBooks} onSettingsClick={navigateToSettings} onAdminClick={navigateToAdmin} />;
     }
   };
 

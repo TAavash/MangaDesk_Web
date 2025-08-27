@@ -1,18 +1,21 @@
 import React, { useState } from 'react';
-import { Edit3, FolderPlus, BookOpen, Settings as SettingsIcon } from 'lucide-react';
+import { Edit3, FolderPlus, BookOpen, Settings as SettingsIcon, BarChart3 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { StatusBar } from '../../components/StatusBar/StatusBar';
 import { SearchBar } from '../../components/SearchBar/SearchBar';
 import { FolderCard } from '../../components/FolderCard/FolderCard';
 import { AddFolderModal } from '../../components/AddFolderModal/AddFolderModal';
 import { useFolders } from '../../hooks/useFolders';
+import { useAuth } from '../../hooks/useAuth';
 
 interface FoldersProps {
   onFolderClick: (folderId: string, folderName: string) => void;
   onSettingsClick: () => void;
+  onAdminClick: () => void;
 }
 
-export const Folders: React.FC<FoldersProps> = ({ onFolderClick, onSettingsClick }) => {
+export const Folders: React.FC<FoldersProps> = ({ onFolderClick, onSettingsClick, onAdminClick }) => {
+  const { user } = useAuth();
   const {
     folders,
     searchQuery,
@@ -25,6 +28,9 @@ export const Folders: React.FC<FoldersProps> = ({ onFolderClick, onSettingsClick
   } = useFolders();
 
   const [showAddModal, setShowAddModal] = useState(false);
+  
+  // Check if user is admin
+  const isAdmin = user?.email === 'admin@mangadesk.com' || user?.user_metadata?.role === 'admin';
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
@@ -41,6 +47,17 @@ export const Folders: React.FC<FoldersProps> = ({ onFolderClick, onSettingsClick
               MangaDesk
             </h1>
             <div className="flex gap-2">
+              {isAdmin && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onAdminClick}
+                  className="h-8 w-8 p-0"
+                  title="Admin Dashboard"
+                >
+                  <BarChart3 className="w-4 h-4" />
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"

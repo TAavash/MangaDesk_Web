@@ -1,6 +1,6 @@
 import { useState } from 'react';
 
-export type Screen = 'folders' | 'books' | 'book-detail' | 'settings';
+export type Screen = 'folders' | 'books' | 'book-detail' | 'settings' | 'admin';
 
 export interface NavigationState {
   currentScreen: Screen;
@@ -41,6 +41,12 @@ export const useNavigation = () => {
     }));
   };
 
+  const navigateToAdmin = () => {
+    setNavigationState(prev => ({
+      ...prev,
+      currentScreen: 'admin'
+    }));
+  };
   const goBack = () => {
     if (navigationState.currentScreen === 'book-detail') {
       setNavigationState(prev => ({
@@ -50,7 +56,7 @@ export const useNavigation = () => {
       }));
     } else if (navigationState.currentScreen === 'books') {
       setNavigationState({ currentScreen: 'folders' });
-    } else if (navigationState.currentScreen === 'settings') {
+    } else if (navigationState.currentScreen === 'settings' || navigationState.currentScreen === 'admin') {
       setNavigationState({ currentScreen: 'folders' });
     }
   };
@@ -61,6 +67,7 @@ export const useNavigation = () => {
     navigateToBooks,
     navigateToBookDetail,
     navigateToSettings,
+    navigateToAdmin,
     goBack
   };
 };

@@ -20,6 +20,22 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
   const [isEditing, setIsEditing] = useState(false);
   const [isEditingProgress, setIsEditingProgress] = useState(false);
   const [isEditingTotal, setIsEditingTotal] = useState(false);
+  const [editingFields, setEditingFields] = useState({
+    title: false,
+    author: false,
+    synopsis: false,
+    year: false,
+    publisher: false,
+    rating: false
+  });
+  const [tempValues, setTempValues] = useState({
+    title: book?.title || '',
+    author: book?.author || '',
+    synopsis: book?.synopsis || '',
+    year: book?.year?.toString() || '',
+    publisher: book?.publisher || '',
+    rating: book?.rating?.toString() || '0'
+  });
   const [tempProgress, setTempProgress] = useState(book?.progress.toString() || '0');
   const [tempTotal, setTempTotal] = useState(book?.totalChapters.toString() || '1');
 
@@ -214,23 +230,106 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
             </div>
             
             <div className="flex-1">
-              <h1 className="text-xl font-bold text-gray-900 mb-1">{book.title}</h1>
-              <p className="text-gray-600 mb-2">{book.author}</p>
+              {isEditing && editingFields.title ? (
+                <div className="mb-1">
+                  <input
+                    type="text"
+                    value={tempValues.title}
+                    onChange={(e) => setTempValues(prev => ({ ...prev, title: e.target.value }))}
+                    onBlur={() => {
+                      updateBook(book.id, { title: tempValues.title });
+                      setEditingFields(prev => ({ ...prev, title: false }));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        updateBook(book.id, { title: tempValues.title });
+                        setEditingFields(prev => ({ ...prev, title: false }));
+                      } else if (e.key === 'Escape') {
+                        setTempValues(prev => ({ ...prev, title: book.title }));
+                        setEditingFields(prev => ({ ...prev, title: false }));
+                      }
+                    }}
+                    className="text-xl font-bold bg-transparent border-b border-blue-500 focus:outline-none w-full"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <h1 
+                  className={`text-xl font-bold text-gray-900 mb-1 ${isEditing ? 'cursor-pointer hover:bg-blue-50 px-1 rounded' : ''}`}
+                  onClick={() => isEditing && setEditingFields(prev => ({ ...prev, title: true }))}
+                >
+                  {book.title}
+                </h1>
+              )}
+              
+              {isEditing && editingFields.author ? (
+                <div className="mb-2">
+                  <input
+                    type="text"
+                    value={tempValues.author}
+                    onChange={(e) => setTempValues(prev => ({ ...prev, author: e.target.value }))}
+                    onBlur={() => {
+                      updateBook(book.id, { author: tempValues.author });
+                      setEditingFields(prev => ({ ...prev, author: false }));
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        updateBook(book.id, { author: tempValues.author });
+                        setEditingFields(prev => ({ ...prev, author: false }));
+                      } else if (e.key === 'Escape') {
+                        setTempValues(prev => ({ ...prev, author: book.author || '' }));
+                        setEditingFields(prev => ({ ...prev, author: false }));
+                      }
+                    }}
+                    className="text-gray-600 bg-transparent border-b border-blue-500 focus:outline-none w-full"
+                    placeholder="Author name"
+                    autoFocus
+                  />
+                </div>
+              ) : (
+                <p 
+                  className={`text-gray-600 mb-2 ${isEditing ? 'cursor-pointer hover:bg-blue-50 px-1 rounded' : ''}`}
+                  onClick={() => isEditing && setEditingFields(prev => ({ ...prev, author: true }))}
+                >
+                  {book.author || 'Unknown Author'}
+                </p>
+              )}
               
               {/* Rating */}
-              <div className="flex items-center gap-1 mb-2">
-                {[1, 2, 3, 4, 5].map((star) => (
-                  <Star
-                    key={star}
-                    className={`w-4 h-4 ${
-                      star <= book.rating 
-                        ? 'text-yellow-400 fill-current' 
-                        : 'text-gray-300'
-                    }`}
-                  />
-                ))}
-                <span className="text-sm text-gray-600 ml-1">{book.rating}/5</span>
-              </div>
+              {isEditing ? (
+                <div className="flex items-center gap-2 mb-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-4 h-4 cursor-pointer ${
+                        star <= parseInt(tempValues.rating) 
+                          ? 'text-yellow-400 fill-current' 
+                          : 'text-gray-300 hover:text-yellow-200'
+                      }`}
+                      onClick={() => {
+                        const newRating = star.toString();
+                        setTempValues(prev => ({ ...prev, rating: newRating }));
+                        updateBook(book.id, { rating: parseInt(newRating) });
+                      }}
+                    />
+                  ))}
+                  <span className="text-sm text-gray-600 ml-1">{tempValues.rating}/5</span>
+                </div>
+              ) : (
+                <div className="flex items-center gap-1 mb-2">
+                  {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                      key={star}
+                      className={`w-4 h-4 ${
+                        star <= book.rating 
+                          ? 'text-yellow-400 fill-current' 
+                          : 'text-gray-300'
+                      }`}
+                    />
+                  ))}
+                  <span className="text-sm text-gray-600 ml-1">{book.rating}/5</span>
+                </div>
+              )}
               
               {/* Favorite indicator */}
               {book.favorite && (
@@ -247,9 +346,20 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
             <Card>
               <CardContent className="p-4">
                 <h3 className="font-semibold text-gray-900 mb-2">Synopsis</h3>
-                <p className="text-sm text-gray-700 leading-relaxed">
-                  {book.synopsis}
-                </p>
+                {isEditing ? (
+                  <textarea
+                    value={tempValues.synopsis}
+                    onChange={(e) => setTempValues(prev => ({ ...prev, synopsis: e.target.value }))}
+                    onBlur={() => updateBook(book.id, { synopsis: tempValues.synopsis })}
+                    className="w-full p-2 text-sm text-gray-700 leading-relaxed border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                    rows={4}
+                    placeholder="Add a synopsis..."
+                  />
+                ) : (
+                  <p className="text-sm text-gray-700 leading-relaxed">
+                    {book.synopsis || 'No synopsis available'}
+                  </p>
+                )}
               </CardContent>
             </Card>
           )}
@@ -278,18 +388,79 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
                 {book.year && (
                   <div className="flex items-center gap-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">
-                      <span className="font-medium">Year:</span> {book.year}
-                    </span>
+                    {isEditing && editingFields.year ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-700">Year:</span>
+                        <input
+                          type="number"
+                          value={tempValues.year}
+                          onChange={(e) => setTempValues(prev => ({ ...prev, year: e.target.value }))}
+                          onBlur={() => {
+                            updateBook(book.id, { year: parseInt(tempValues.year) || undefined });
+                            setEditingFields(prev => ({ ...prev, year: false }));
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              updateBook(book.id, { year: parseInt(tempValues.year) || undefined });
+                              setEditingFields(prev => ({ ...prev, year: false }));
+                            } else if (e.key === 'Escape') {
+                              setTempValues(prev => ({ ...prev, year: book.year?.toString() || '' }));
+                              setEditingFields(prev => ({ ...prev, year: false }));
+                            }
+                          }}
+                          className="w-20 px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none"
+                          min="1900"
+                          max={new Date().getFullYear()}
+                          autoFocus
+                        />
+                      </div>
+                    ) : (
+                      <span 
+                        className={`text-sm text-gray-700 ${isEditing ? 'cursor-pointer hover:bg-blue-50 px-1 rounded' : ''}`}
+                        onClick={() => isEditing && setEditingFields(prev => ({ ...prev, year: true }))}
+                      >
+                        <span className="font-medium">Year:</span> {book.year}
+                      </span>
+                    )}
                   </div>
                 )}
 
                 {book.publisher && (
                   <div className="flex items-center gap-2">
                     <Building2 className="w-4 h-4 text-gray-500" />
-                    <span className="text-sm text-gray-700">
-                      <span className="font-medium">Publisher:</span> {book.publisher}
-                    </span>
+                    {isEditing && editingFields.publisher ? (
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-gray-700">Publisher:</span>
+                        <input
+                          type="text"
+                          value={tempValues.publisher}
+                          onChange={(e) => setTempValues(prev => ({ ...prev, publisher: e.target.value }))}
+                          onBlur={() => {
+                            updateBook(book.id, { publisher: tempValues.publisher });
+                            setEditingFields(prev => ({ ...prev, publisher: false }));
+                          }}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') {
+                              updateBook(book.id, { publisher: tempValues.publisher });
+                              setEditingFields(prev => ({ ...prev, publisher: false }));
+                            } else if (e.key === 'Escape') {
+                              setTempValues(prev => ({ ...prev, publisher: book.publisher || '' }));
+                              setEditingFields(prev => ({ ...prev, publisher: false }));
+                            }
+                          }}
+                          className="flex-1 px-2 py-1 text-sm border border-blue-500 rounded focus:outline-none"
+                          placeholder="Publisher name"
+                          autoFocus
+                        />
+                      </div>
+                    ) : (
+                      <span 
+                        className={`text-sm text-gray-700 ${isEditing ? 'cursor-pointer hover:bg-blue-50 px-1 rounded' : ''}`}
+                        onClick={() => isEditing && setEditingFields(prev => ({ ...prev, publisher: true }))}
+                      >
+                        <span className="font-medium">Publisher:</span> {book.publisher}
+                      </span>
+                    )}
                   </div>
                 )}
 
