@@ -85,19 +85,20 @@ export const BookCard: React.FC<BookCardProps> = ({ book, onClick, onMove, showM
             </div>
 
             {/* Progress Bar */}
-            {book.status === 'reading' && book.totalChapters && (
-              <div className="mt-2">
-                <div className="w-full bg-gray-200 rounded-full h-1">
-                  <div 
-                  <span className="text-xs text-gray-500 dark:text-gray-400 mt-1">
-                    style={{ width: `${progressPercentage}%` }}
-                  />
-                </div>
-                <span className="text-xs text-gray-500 mt-1">
-                  {progressPercentage}% complete
-                </span>
-              </div>
-            )}
+{book.status === 'reading' && book.totalChapters && (
+  <div className="mt-2">
+    <div className="w-full bg-gray-200 rounded-full h-1">
+      <div
+        className="bg-blue-500 h-1 rounded-full"
+        style={{ width: `${progressPercentage}%` }}
+      />
+    </div>
+    <span className="text-xs text-gray-500 dark:text-gray-400 mt-1 block">
+      {progressPercentage}% complete
+    </span>
+  </div>
+)}
+
 
             {/* Rating */}
             {book.rating && (
