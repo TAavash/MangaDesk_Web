@@ -26,7 +26,8 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
     synopsis: false,
     year: false,
     publisher: false,
-    rating: false
+    rating: false,
+    coverUrl: false
   });
   const [tempValues, setTempValues] = useState({
     title: book?.title || '',
@@ -34,7 +35,8 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
     synopsis: book?.synopsis || '',
     year: book?.year?.toString() || '',
     publisher: book?.publisher || '',
-    rating: book?.rating?.toString() || '0'
+    rating: book?.rating?.toString() || '0',
+    coverUrl: book?.coverUrl || ''
   });
   const [tempProgress, setTempProgress] = useState(book?.progress.toString() || '0');
   const [tempTotal, setTempTotal] = useState(book?.totalChapters.toString() || '1');
@@ -213,7 +215,7 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
         <div className="px-6 py-4 space-y-4 max-h-[500px] overflow-y-auto">
           {/* Cover and Basic Info */}
           <div className="flex gap-4">
-            <div className="w-20 h-28 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
+            <div className="w-20 h-28 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 relative group">
               {book.coverUrl ? (
                 <img 
                   src={book.coverUrl} 
@@ -227,9 +229,70 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
                   </span>
                 </div>
               )}
+              {isEditing && (
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <button
+                    onClick={() => setEditingFields(prev => ({ ...prev, coverUrl: true }))}
+                    className="text-white text-xs bg-blue-600 px-2 py-1 rounded"
+                  >
+                    Edit Cover
+                  </button>
+                </div>
+              )}
             </div>
             
             <div className="flex-1">
+              {/* Cover URL Edit Modal */}
+              {isEditing && editingFields.coverUrl && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+                  <div className="bg-white dark:bg-gray-800 rounded-lg p-4 w-full max-w-sm">
+                    <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Edit Cover Image</h3>
+                    <div className="space-y-3">
+                      <input
+                        type="url"
+                        value={tempValues.coverUrl}
+                        onChange={(e) => setTempValues(prev => ({ ...prev, coverUrl: e.target.value }))}
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+                        placeholder="Enter image URL..."
+                      />
+                      {tempValues.coverUrl && (
+                        <div className="flex justify-center">
+                          <img 
+                            src={tempValues.coverUrl} 
+                            alt="Preview"
+                            className="w-16 h-20 object-cover rounded border"
+                            onError={(e) => {
+                              e.currentTarget.style.display = 'none';
+                            }}
+                          />
+                        </div>
+                      )}
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() => {
+                            updateBook(book.id, { coverUrl: tempValues.coverUrl });
+                            setEditingFields(prev => ({ ...prev, coverUrl: false }));
+                          }}
+                          className="flex-1 bg-blue-600 hover:bg-blue-700"
+                        >
+                          Save
+                        </Button>
+                        <Button
+                          variant="outline"
+                          onClick={() => {
+                            setTempValues(prev => ({ ...prev, coverUrl: book.coverUrl || '' }));
+                            setEditingFields(prev => ({ ...prev, coverUrl: false }));
+                          }}
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
               {isEditing && editingFields.title ? (
                 <div className="mb-1">
                   <input

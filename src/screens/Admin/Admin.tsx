@@ -21,7 +21,7 @@ interface AdminStats {
 }
 
 export const Admin: React.FC<AdminProps> = ({ onBack }) => {
-  const { user } = useAuth();
+  const { isAdmin } = useAuth();
   const [stats, setStats] = useState<AdminStats>({
     totalUsers: 0,
     totalFolders: 0,
@@ -35,9 +35,6 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'books' | 'analytics'>('overview');
   const [users, setUsers] = useState<any[]>([]);
   const [books, setBooks] = useState<any[]>([]);
-
-  // Check if user is admin (you can implement your own admin check logic)
-  const isAdmin = user?.email === 'admin@mangadesk.com' || user?.user_metadata?.role === 'admin';
 
   useEffect(() => {
     if (isAdmin) {
@@ -130,10 +127,10 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
 
   if (!isAdmin) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center p-4">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Access Denied</h1>
-          <p className="text-gray-600 mb-4">You don't have permission to access the admin dashboard.</p>
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Access Denied</h1>
+          <p className="text-gray-600 dark:text-gray-300 mb-4">You don't have permission to access the admin dashboard.</p>
           <Button onClick={onBack}>Go Back</Button>
         </div>
       </div>
@@ -142,22 +139,22 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
         <div className="text-center">
           <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading admin dashboard...</p>
+          <p className="text-gray-600 dark:text-gray-300">Loading admin dashboard...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-sm bg-white rounded-3xl shadow-2xl overflow-hidden relative">
+    <div className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center p-4">
+      <div className="w-full max-w-sm bg-white dark:bg-black rounded-3xl shadow-2xl overflow-hidden relative border dark:border-gray-800">
         <StatusBar />
 
         {/* Header */}
-        <div className="px-6 py-4 border-b border-gray-100">
+        <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
           <div className="flex items-center gap-3 mb-4">
             <Button
               variant="ghost"
@@ -165,13 +162,13 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
               onClick={onBack}
               className="h-8 w-8 p-0"
             >
-              <ArrowLeft className="w-4 h-4" />
+              <ArrowLeft className="w-4 h-4 text-gray-600 dark:text-gray-300" />
             </Button>
-            <h1 className="text-xl font-bold text-gray-900">Admin Dashboard</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
           </div>
 
           {/* Tab Navigation */}
-          <div className="flex gap-1 bg-gray-100 rounded-lg p-1">
+          <div className="flex gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
             {[
               { id: 'overview', label: 'Overview', icon: BarChart3 },
               { id: 'users', label: 'Users', icon: Users },
@@ -183,8 +180,8 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
                 onClick={() => setActiveTab(tab.id as any)}
                 className={`flex-1 flex items-center justify-center gap-1 px-2 py-1 rounded-md text-xs font-medium transition-colors ${
                   activeTab === tab.id
-                    ? 'bg-white text-blue-600 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white dark:bg-gray-700 text-blue-600 shadow-sm'
+                    : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                 }`}
               >
                 <tab.icon className="w-3 h-3" />
@@ -195,7 +192,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
         </div>
 
         {/* Content */}
-        <div className="px-6 py-4 space-y-4 max-h-[500px] overflow-y-auto">
+        <div className="px-6 py-4 space-y-4 max-h-[500px] overflow-y-auto bg-white dark:bg-black">
           {activeTab === 'overview' && (
             <>
               {/* Stats Cards */}

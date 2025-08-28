@@ -192,6 +192,31 @@ export const useBooks = (folderId: string) => {
     }
   };
 
+  const moveBook = async (bookId: string, newFolderId: string) => {
+    if (!user) return;
+
+    try {
+      const { data, error } = await supabase
+        .rpc('move_book_to_folder', {
+          book_id: bookId,
+          new_folder_id: newFolderId,
+          user_id: user.id
+        });
+
+      if (error) throw error;
+      
+      if (data) {
+        // Refresh books to reflect the change
+        await fetchBooks();
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error('Error moving book:', error);
+      return false;
+    }
+  };
+
   // Get a single book by ID
   const getBook = (bookId: string): Book | undefined => {
     return books.find(book => book.id === bookId);
@@ -206,6 +231,7 @@ export const useBooks = (folderId: string) => {
     addBook,
     updateBook,
     deleteBook,
+    moveBook,
     getBook,
     loading,
     refetch: fetchBooks
