@@ -196,32 +196,71 @@ export const useBooks = (folderId: string) => {
     if (!user) return;
 
     try {
-      const { data, error } = await supabase
-        .rpc('move_book_to_folder', {
-          book_id: bookId,
-          new_folder_id: newFolderId,
-          user_id: user.id
-        });
+      const { error } = await supabase
+        .from('books')
+        .update({ 
+          folder_id: newFolderId,
+          moved_from_folder: folderId,
+          moved_at: new Date().toISOString()
+        })
+        .eq('id', bookId)
+        .eq('user_id', user.id);
 
       if (error) throw error;
       
-      if (data) {
-        // Refresh books to reflect the change
-        await fetchBooks();
-        return true;
-      }
-      return false;
+      // Remove book from current folder's state
+      setBooks(prev => prev.filter(book => book.id !== bookId));
+      return true;
     } catch (error) {
       console.error('Error moving book:', error);
       return false;
     }
   };
 
+  const copyBook = async (bookId: string, newFolderId: string) => {
+    if (!user) return;
+
+    try {
+      const originalBook = books.find(book => book.id === bookId);
+      if (!originalBook) return false;
+
+      const { data, error } = await supabase
+        .from('books')
+        .insert([
+          {
+            title: `${originalBook.title} (Copy)`,
+            author: originalBook.author || null,
+            status: originalBook.status,
+            progress: 0, // Reset progress for copy
+            total_chapters: originalBook.totalChapters,
+            folder_id: newFolderId,
+            user_id: user.id,
+            cover_url: originalBook.coverUrl || null,
+            rating: originalBook.rating || null,
+            notes: originalBook.notes || null,
+            synopsis: originalBook.synopsis || null,
+            genre: originalBook.genre || null,
+            tags: originalBook.tags || null,
+            year: originalBook.year || null,
+            publisher: originalBook.publisher || null,
+            language: originalBook.language || 'Japanese',
+            favorite: false
+          }
+        ])
+        .select()
+        .single();
   // Get a single book by ID
   const getBook = (bookId: string): Book | undefined => {
     return books.find(book => book.id === bookId);
   };
 
+      if (error) throw error;
+      return true;
+    } catch (error) {
+      console.error('Error copying book:', error);
+      return false;
+    }
+  };
   return {
     books: filteredBooks,
     searchQuery,
@@ -232,6 +271,7 @@ export const useBooks = (folderId: string) => {
     updateBook,
     deleteBook,
     moveBook,
+    copyBook,
     getBook,
     loading,
     refetch: fetchBooks
