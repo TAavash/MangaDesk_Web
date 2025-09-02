@@ -6,6 +6,7 @@ export const useTheme = () => {
     if (saved === 'light' || saved === 'dark') {
       return saved;
     }
+    // Default to light theme for new users
     return 'light';
   });
 

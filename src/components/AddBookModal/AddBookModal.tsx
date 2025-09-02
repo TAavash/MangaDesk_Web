@@ -193,9 +193,9 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl w-full max-w-sm mx-4 shadow-xl max-h-[95vh] overflow-hidden flex flex-col">
-        <div className="flex items-center justify-between p-4 border-b border-gray-100 flex-shrink-0">
-          <h2 className="text-lg font-bold text-gray-900">Add New Book</h2>
+      <div className="bg-white dark:bg-black rounded-2xl w-full max-w-sm mx-4 shadow-xl max-h-[95vh] overflow-hidden flex flex-col border dark:border-gray-700">
+        <div className="flex items-center justify-between p-4 border-b border-gray-100 dark:border-gray-700 flex-shrink-0">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white">Add New Book</h2>
           <Button
             variant="ghost"
             size="sm"
@@ -205,7 +205,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
             }}
             className="h-8 w-8 p-0"
           >
-            <X className="w-4 h-4" />
+            <X className="w-4 h-4 text-gray-600 dark:text-gray-300" />
           </Button>
         </div>
         
@@ -213,35 +213,35 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
           <form onSubmit={handleSubmit} className="p-4 space-y-4">
             {/* Basic Info */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Title *
               </label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                 placeholder="Enter book title..."
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Author
               </label>
               <input
                 type="text"
                 value={formData.author}
                 onChange={(e) => setFormData(prev => ({ ...prev, author: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                 placeholder="Enter author name..."
               />
             </div>
 
             {/* Cover Image */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Cover Image URL
               </label>
               <div className="space-y-2">
@@ -249,7 +249,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                   type="url"
                   value={formData.coverUrl}
                   onChange={(e) => setFormData(prev => ({ ...prev, coverUrl: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                   placeholder="https://example.com/cover.jpg"
                 />
                 <div className="flex gap-2">
@@ -262,7 +262,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                   />
                   <label
                     htmlFor="cover-upload"
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm cursor-pointer hover:bg-gray-50 flex items-center justify-center gap-2"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-gray-800 flex items-center justify-center gap-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-black"
                   >
                     <Upload className="w-4 h-4" />
                     Upload from Device
@@ -286,13 +286,13 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
             {/* Status and Progress */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Status
                 </label>
                 <select
                   value={formData.status}
                   onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as Book['status'] }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                 >
                   <option value="plan-to-read">Plan to Read</option>
                   <option value="reading">Reading</option>
@@ -302,34 +302,24 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Total Chapters
                 </label>
                 <input
                   type="number"
                   value={formData.totalChapters}
                   onChange={(e) => {
-                    const value = e.target.value;
-                    if (value === '') {
-                      setFormData(prev => ({ ...prev, totalChapters: '' as any }));
-                    } else {
-                      setFormData(prev => ({ ...prev, totalChapters: Math.max(1, parseInt(value) || 1) }));
-                    }
+                    const value = parseInt(e.target.value) || 1;
+                    setFormData(prev => ({ ...prev, totalChapters: Math.max(1, value) }));
                   }}
-                  onBlur={(e) => {
-                    if (e.target.value === '' || parseInt(e.target.value) < 1) {
-                      setFormData(prev => ({ ...prev, totalChapters: 1 }));
-                    }
-                  }}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                   min="1"
-                  placeholder="1"
                 />
               </div>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Current Progress
               </label>
               {isEditingProgress ? (
@@ -340,7 +330,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                     onChange={(e) => setTempProgress(e.target.value)}
                     onKeyDown={handleProgressKeyPress}
                     onBlur={saveProgress}
-                    className="flex-1 px-3 py-2 border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                    className="flex-1 px-3 py-2 border border-blue-300 dark:border-blue-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                     min="0"
                     max={formData.totalChapters}
                     autoFocus
@@ -360,7 +350,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                   <button
                     type="button"
                     onClick={handleProgressEdit}
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-left text-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg text-left text-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white"
                   >
                     {formData.progress} chapters
                   </button>
@@ -371,14 +361,14 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
             {/* Additional Info */}
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Year
                 </label>
                 <input
                   type="number"
                   value={formData.year}
                   onChange={(e) => setFormData(prev => ({ ...prev, year: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                   placeholder="2024"
                   min="1900"
                   max={new Date().getFullYear()}
@@ -386,13 +376,13 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                   Language
                 </label>
                 <select
                   value={formData.language}
                   onChange={(e) => setFormData(prev => ({ ...prev, language: e.target.value }))}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                 >
                   <option value="Japanese">Japanese</option>
                   <option value="Korean">Korean</option>
@@ -404,27 +394,27 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Publisher
               </label>
               <input
                 type="text"
                 value={formData.publisher}
                 onChange={(e) => setFormData(prev => ({ ...prev, publisher: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                 placeholder="Publisher name..."
               />
             </div>
 
             {/* Genres */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Genres
               </label>
               
               {/* Quick Select Genres */}
               <div className="mb-2">
-                <p className="text-xs text-gray-500 mb-2">Quick select:</p>
+                <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Quick select:</p>
                 <div className="flex flex-wrap gap-1 max-h-20 overflow-y-auto">
                   {GENRE_OPTIONS.map((genre) => (
                     <button
@@ -434,8 +424,8 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                       disabled={formData.genre.includes(genre)}
                       className={`px-2 py-1 text-xs rounded-full transition-colors ${
                         formData.genre.includes(genre)
-                          ? 'bg-blue-100 text-blue-700 cursor-not-allowed opacity-50'
-                          : 'bg-gray-100 text-gray-700 hover:bg-blue-50 hover:text-blue-600'
+                          ? 'bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 cursor-not-allowed opacity-50'
+                          : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:text-blue-600 dark:hover:text-blue-400'
                       }`}
                     >
                       {genre}
@@ -451,7 +441,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                   value={newGenre}
                   onChange={(e) => setNewGenre(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addGenre())}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                   placeholder="Add custom genre..."
                 />
                 <Button
@@ -470,7 +460,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                   {formData.genre.map((genre, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full cursor-pointer hover:bg-blue-200 flex items-center gap-1"
+                      className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs rounded-full cursor-pointer hover:bg-blue-200 dark:hover:bg-blue-800 flex items-center gap-1"
                       onClick={() => removeGenre(genre)}
                     >
                       {genre} <X className="w-3 h-3" />
@@ -482,7 +472,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
 
             {/* Tags */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Tags
               </label>
               <div className="flex gap-2 mb-2">
@@ -491,7 +481,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addTag())}
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                  className="flex-1 px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                   placeholder="Add tag..."
                 />
                 <Button
@@ -508,7 +498,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
                   {formData.tags.map((tag, index) => (
                     <span
                       key={index}
-                      className="px-2 py-1 bg-gray-100 text-gray-700 text-xs rounded-full cursor-pointer hover:bg-gray-200 flex items-center gap-1"
+                      className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 text-xs rounded-full cursor-pointer hover:bg-gray-200 dark:hover:bg-gray-700 flex items-center gap-1"
                       onClick={() => removeTag(tag)}
                     >
                       #{tag} <X className="w-3 h-3" />
@@ -520,13 +510,13 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
 
             {/* Synopsis */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Synopsis
               </label>
               <textarea
                 value={formData.synopsis}
                 onChange={(e) => setFormData(prev => ({ ...prev, synopsis: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                 rows={3}
                 placeholder="Brief description of the story..."
               />
@@ -534,14 +524,14 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
 
             {/* Rating */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Rating (1-5)
               </label>
               <input
                 type="number"
                 value={formData.rating}
                 onChange={(e) => setFormData(prev => ({ ...prev, rating: Math.min(5, Math.max(0, parseInt(e.target.value) || 0)) }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                 min="0"
                 max="5"
               />
@@ -549,13 +539,13 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
 
             {/* Notes */}
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
                 Notes
               </label>
               <textarea
                 value={formData.notes}
                 onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm"
+                className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none text-sm bg-white dark:bg-black text-gray-900 dark:text-white"
                 rows={2}
                 placeholder="Your thoughts about this book..."
               />
@@ -564,7 +554,7 @@ export const AddBookModal: React.FC<AddBookModalProps> = ({
         </div>
 
         {/* Fixed Bottom Buttons */}
-        <div className="flex gap-3 p-4 border-t border-gray-100 bg-white flex-shrink-0">
+        <div className="flex gap-3 p-4 border-t border-gray-100 dark:border-gray-700 bg-white dark:bg-black flex-shrink-0">
           <Button
             type="button"
             variant="outline"
