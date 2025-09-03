@@ -759,12 +759,12 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
                   size="sm"
                   onClick={() => updateProgress(-1)}
                   disabled={book.progress <= 0}
-                  className="h-8 w-8 p-0 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+                  className="h-8 w-8 p-0"
                 >
                   <Minus className="w-4 h-4" />
                 </Button>
                 
-                <span className="font-medium text-gray-900 dark:text-white min-w-[60px] text-center">
+                <span className="font-medium text-gray-900 min-w-[60px] text-center">
                   {book.progress}
                 </span>
                 
@@ -773,7 +773,7 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
                   size="sm"
                   onClick={() => updateProgress(1)}
                   disabled={book.progress >= book.totalChapters}
-                  className="h-8 w-8 p-0 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300"
+                  className="h-8 w-8 p-0"
                 >
                   <Plus className="w-4 h-4" />
                 </Button>
@@ -782,19 +782,19 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
           </Card>
 
           {/* Notes */}
-          <Card className="dark:bg-black dark:border-gray-700">
+          <Card>
             <CardContent className="p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Notes</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">Notes</h3>
               {isEditing ? (
                 <textarea
                   value={book.notes}
                   onChange={(e) => handleNotesChange(e.target.value)}
-                  className="w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-black text-gray-900 dark:text-white"
+                  className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
                   rows={4}
                   placeholder="Add your thoughts about this book..."
                 />
               ) : (
-                <p className="text-gray-700 dark:text-gray-300 text-sm leading-relaxed">
+                <p className="text-gray-700 text-sm leading-relaxed">
                   {book.notes || 'No notes added yet.'}
                 </p>
               )}
@@ -802,36 +802,36 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
           </Card>
 
           {/* Metadata */}
-          <Card className="dark:bg-black dark:border-gray-700">
+          <Card>
             <CardContent className="p-4">
-              <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Reading History</h3>
+              <h3 className="font-semibold text-gray-900 mb-3">Reading History</h3>
               <div className="space-y-2 text-sm">
                 {book.startDate && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Started Reading:</span>
-                    <span className="text-gray-900 dark:text-white">
+                    <span className="text-gray-600">Started Reading:</span>
+                    <span className="text-gray-900">
                       {new Date(book.startDate).toLocaleDateString()}
                     </span>
                   </div>
                 )}
                 {book.finishDate && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Finished Reading:</span>
-                    <span className="text-gray-900 dark:text-white">
+                    <span className="text-gray-600">Finished Reading:</span>
+                    <span className="text-gray-900">
                       {new Date(book.finishDate).toLocaleDateString()}
                     </span>
                   </div>
                 )}
                 <div className="flex justify-between">
-                  <span className="text-gray-600 dark:text-gray-400">Date Added:</span>
-                  <span className="text-gray-900 dark:text-white">
+                  <span className="text-gray-600">Date Added:</span>
+                  <span className="text-gray-900">
                     {new Date(book.dateAdded).toLocaleDateString()}
                   </span>
                 </div>
                 {book.lastRead && (
                   <div className="flex justify-between">
-                    <span className="text-gray-600 dark:text-gray-400">Last Read:</span>
-                    <span className="text-gray-900 dark:text-white">
+                    <span className="text-gray-600">Last Read:</span>
+                    <span className="text-gray-900">
                       {new Date(book.lastRead).toLocaleDateString()}
                     </span>
                   </div>
@@ -843,7 +843,7 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
 
         {/* Home Indicator */}
         <div className="flex justify-center py-2">
-          <div className="w-32 h-1 bg-black dark:bg-white rounded-full" />
+          <div className="w-32 h-1 bg-black rounded-full" />
         </div>
       </div>
     </div>
