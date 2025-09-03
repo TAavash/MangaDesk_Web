@@ -39,7 +39,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
   };
 
   return (
-    <Card className="group hover:shadow-md transition-all duration-200 border border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 bg-white dark:bg-black">
+    <Card className="group hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-gray-300 bg-white">
       <CardContent className="p-0">
         <div className="flex items-center justify-between h-16">
           <div 
@@ -58,7 +58,7 @@ export const FolderCard: React.FC<FolderCardProps> = ({
                 onChange={(e) => setEditName(e.target.value)}
                 onBlur={handleSaveName}
                 onKeyDown={handleKeyPress}
-                className="flex-1 bg-transparent outline-none border-b border-blue-500 text-gray-900 dark:text-white font-medium"
+                className="flex-1 bg-transparent outline-none border-b border-blue-500 text-gray-900 font-medium"
                 autoFocus
               />
             ) : (
@@ -75,25 +75,25 @@ export const FolderCard: React.FC<FolderCardProps> = ({
                   variant="ghost"
                   size="sm"
                   onClick={() => setIsEditingName(true)}
-                  className="h-8 w-8 p-0 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  className="h-8 w-8 p-0 hover:bg-blue-50"
                 >
-                  <Edit3 className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                  <Edit3 className="w-4 h-4 text-blue-600" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="sm"
                   onClick={() => onDelete(folder.id)}
-                  className="h-8 w-8 p-0 hover:bg-red-50 dark:hover:bg-red-900/20"
+                  className="h-8 w-8 p-0 hover:bg-red-50"
                 >
                   <Trash2 className="w-4 h-4 text-red-600" />
                 </Button>
               </div>
             ) : (
               <>
-                <span className="text-sm text-gray-500 dark:text-gray-400 font-medium min-w-[20px] text-right">
+                <span className="text-sm text-gray-500 font-medium min-w-[20px] text-right">
                   {folder.count}
                 </span>
-                <ChevronRight className="w-5 h-5 text-gray-400 dark:text-gray-500 group-hover:text-gray-600 dark:group-hover:text-gray-300 transition-colors" />
+                <ChevronRight className="w-5 h-5 text-gray-400 group-hover:text-gray-600 transition-colors" />
               </>
             )}
           </div>
