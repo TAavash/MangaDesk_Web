@@ -7,6 +7,7 @@ import { FolderCard } from '../../components/FolderCard/FolderCard';
 import { AddFolderModal } from '../../components/AddFolderModal/AddFolderModal';
 import { useFolders } from '../../hooks/useFolders';
 import { useAuth } from '../../hooks/useAuth';
+import { supabase } from '../../lib/supabase';
 
 interface FoldersProps {
   onFolderClick: (folderId: string, folderName: string) => void;
@@ -30,7 +31,28 @@ export const Folders: React.FC<FoldersProps> = ({ onFolderClick, onSettingsClick
   const [showAddModal, setShowAddModal] = useState(false);
   
   // Check if user is admin
-  const isAdmin = user?.email === 'admin@mangadesk.com' || user?.user_metadata?.role === 'admin';
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        setIsAdmin(profile?.role === 'admin');
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">

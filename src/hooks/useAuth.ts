@@ -41,6 +41,9 @@ export const useAuth = () => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        emailRedirectTo: undefined // Disable email confirmation
+      }
     });
     return { data, error };
   };

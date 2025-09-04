@@ -6,7 +6,7 @@ export const useTheme = () => {
     if (saved === 'light' || saved === 'dark') {
       return saved;
     }
-    return 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
   });
 
   useEffect(() => {

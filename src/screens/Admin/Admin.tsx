@@ -36,8 +36,29 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
   const [users, setUsers] = useState<any[]>([]);
   const [books, setBooks] = useState<any[]>([]);
 
-  // Check if user is admin (you can implement your own admin check logic)
-  const isAdmin = user?.email === 'admin@mangadesk.com' || user?.user_metadata?.role === 'admin';
+  // Check if user is admin
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    const checkAdminStatus = async () => {
+      if (!user) return;
+      
+      try {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('role')
+          .eq('id', user.id)
+          .single();
+        
+        setIsAdmin(profile?.role === 'admin');
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdminStatus();
+  }, [user]);
 
   useEffect(() => {
     if (isAdmin) {
@@ -49,16 +70,16 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
     try {
       setLoading(true);
 
-      // Fetch basic stats
-      const [usersResult, foldersResult, booksResult] = await Promise.all([
-        supabase.from('users').select('*', { count: 'exact' }),
+      // Fetch basic stats using profiles table
+      const [profilesResult, foldersResult, booksResult] = await Promise.all([
+        supabase.from('profiles').select('*', { count: 'exact' }),
         supabase.from('folders').select('*', { count: 'exact' }),
         supabase.from('books').select('*', { count: 'exact' })
       ]);
 
       // Fetch detailed data
-      const [usersData, booksData] = await Promise.all([
-        supabase.from('users').select('*').order('created_at', { ascending: false }).limit(100),
+      const [profilesData, booksData] = await Promise.all([
+        supabase.from('profiles').select('*').order('created_at', { ascending: false }).limit(100),
         supabase.from('books').select('*, folders(name)').order('created_at', { ascending: false }).limit(100)
       ]);
 
@@ -78,16 +99,16 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
         .slice(0, 10);
 
       setStats({
-        totalUsers: usersResult.count || 0,
+        totalUsers: profilesResult.count || 0,
         totalFolders: foldersResult.count || 0,
         totalBooks: booksResult.count || 0,
-        activeUsers: Math.floor((usersResult.count || 0) * 0.7), // Mock active users
+        activeUsers: Math.floor((profilesResult.count || 0) * 0.7), // Mock active users
         recentActivity: [],
         topGenres,
         userGrowth: []
       });
 
-      setUsers(usersData.data || []);
+      setUsers(profilesData.data || []);
       setBooks(booksData.data || []);
     } catch (error) {
       console.error('Error fetching admin data:', error);
@@ -99,7 +120,12 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
   const deleteUser = async (userId: string) => {
     if (window.confirm('Are you sure you want to delete this user? This will also delete all their data.')) {
       try {
-        const { error } = await supabase.auth.admin.deleteUser(userId);
+        // Delete user profile (cascade will handle related data)
+        const { error } = await supabase
+          .from('profiles')
+          .delete()
+          .eq('id', userId);
+          
         if (error) throw error;
         
         // Refresh data

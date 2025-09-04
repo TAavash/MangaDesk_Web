@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeft, Star, Edit3, Trash2, Plus, Minus, Heart, Calendar, Tag, Globe, Building2, RotateCcw, Check } from 'lucide-react';
+import { ArrowLeft, Star, Edit3, Trash2, Plus, Minus, Heart, Calendar, Tag, Globe, Building2, RotateCcw, Check, Image } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { StatusBar } from '../../components/StatusBar/StatusBar';
 import { Card, CardContent } from '../../components/ui/card';
@@ -38,6 +38,25 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
   });
   const [tempProgress, setTempProgress] = useState(book?.progress.toString() || '0');
   const [tempTotal, setTempTotal] = useState(book?.totalChapters.toString() || '1');
+  const [isEditingCover, setIsEditingCover] = useState(false);
+  const [tempCoverUrl, setTempCoverUrl] = useState(book?.coverUrl || '');
+
+  // Update temp values when book changes
+  React.useEffect(() => {
+    if (book) {
+      setTempValues({
+        title: book.title,
+        author: book.author || '',
+        synopsis: book.synopsis || '',
+        year: book.year?.toString() || '',
+        publisher: book.publisher || '',
+        rating: book.rating?.toString() || '0'
+      });
+      setTempProgress(book.progress.toString());
+      setTempTotal(book.totalChapters.toString());
+      setTempCoverUrl(book.coverUrl || '');
+    }
+  }, [book]);
 
   if (!book) {
     return (
@@ -155,6 +174,21 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
     updateBook(book.id, { notes });
   };
 
+  const handleCoverEdit = () => {
+    setTempCoverUrl(book.coverUrl || '');
+    setIsEditingCover(true);
+  };
+
+  const saveCover = () => {
+    updateBook(book.id, { coverUrl: tempCoverUrl || undefined });
+    setIsEditingCover(false);
+  };
+
+  const cancelCoverEdit = () => {
+    setTempCoverUrl(book.coverUrl || '');
+    setIsEditingCover(false);
+  };
+
   const progressPercentage = Math.round((book.progress / book.totalChapters) * 100);
 
   const statusOptions = [
@@ -213,19 +247,76 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
         <div className="px-6 py-4 space-y-4 max-h-[500px] overflow-y-auto">
           {/* Cover and Basic Info */}
           <div className="flex gap-4">
-            <div className="w-20 h-28 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0">
-              {book.coverUrl ? (
-                <img 
-                  src={book.coverUrl} 
-                  alt={book.title}
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
-                  <span className="text-white font-bold">
-                    {book.title.charAt(0)}
-                  </span>
+            <div className="w-20 h-28 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 relative group">
+              {isEditingCover ? (
+                <div className="w-full h-full flex flex-col">
+                  <input
+                    type="url"
+                    value={tempCoverUrl}
+                    onChange={(e) => setTempCoverUrl(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') saveCover();
+                      if (e.key === 'Escape') cancelCoverEdit();
+                    }}
+                    className="w-full px-1 py-1 text-xs border border-blue-500 rounded focus:outline-none"
+                    placeholder="Image URL..."
+                    autoFocus
+                  />
+                  <div className="flex gap-1 mt-1">
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={saveCover}
+                      className="h-4 w-4 p-0 text-green-600"
+                    >
+                      <Check className="w-3 h-3" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={cancelCoverEdit}
+                      className="h-4 w-4 p-0 text-gray-500"
+                    >
+                      <RotateCcw className="w-3 h-3" />
+                    </Button>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  {book.coverUrl ? (
+                    <img 
+                      src={book.coverUrl} 
+                      alt={book.title}
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement!.innerHTML = `
+                          <div class="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                            <span class="text-white font-bold">${book.title.charAt(0)}</span>
+                          </div>
+                        `;
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center">
+                      <span className="text-white font-bold">
+                        {book.title.charAt(0)}
+                      </span>
+                    </div>
+                  )}
+                  {isEditing && (
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleCoverEdit}
+                        className="h-6 w-6 p-0 text-white hover:bg-white/20"
+                      >
+                        <Image className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </>
               )}
             </div>
             
@@ -342,27 +433,38 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
           </div>
 
           {/* Synopsis */}
-          {book.synopsis && (
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="font-semibold text-gray-900 mb-2">Synopsis</h3>
-                {isEditing ? (
-                  <textarea
-                    value={tempValues.synopsis}
-                    onChange={(e) => setTempValues(prev => ({ ...prev, synopsis: e.target.value }))}
-                    onBlur={() => updateBook(book.id, { synopsis: tempValues.synopsis })}
-                    className="w-full p-2 text-sm text-gray-700 leading-relaxed border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                    rows={4}
-                    placeholder="Add a synopsis..."
-                  />
-                ) : (
-                  <p className="text-sm text-gray-700 leading-relaxed">
-                    {book.synopsis || 'No synopsis available'}
-                  </p>
-                )}
-              </CardContent>
-            </Card>
-          )}
+          <Card>
+            <CardContent className="p-4">
+              <h3 className="font-semibold text-gray-900 mb-2">Synopsis</h3>
+              {isEditing && editingFields.synopsis ? (
+                <textarea
+                  value={tempValues.synopsis}
+                  onChange={(e) => setTempValues(prev => ({ ...prev, synopsis: e.target.value }))}
+                  onBlur={() => {
+                    updateBook(book.id, { synopsis: tempValues.synopsis });
+                    setEditingFields(prev => ({ ...prev, synopsis: false }));
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Escape') {
+                      setTempValues(prev => ({ ...prev, synopsis: book.synopsis || '' }));
+                      setEditingFields(prev => ({ ...prev, synopsis: false }));
+                    }
+                  }}
+                  className="w-full p-2 text-sm text-gray-700 leading-relaxed border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                  rows={4}
+                  placeholder="Add a synopsis..."
+                  autoFocus
+                />
+              ) : (
+                <p 
+                  className={`text-sm text-gray-700 leading-relaxed ${isEditing ? 'cursor-pointer hover:bg-blue-50 px-1 rounded' : ''}`}
+                  onClick={() => isEditing && setEditingFields(prev => ({ ...prev, synopsis: true }))}
+                >
+                  {book.synopsis || 'No synopsis available'}
+                </p>
+              )}
+            </CardContent>
+          </Card>
 
           {/* Book Information */}
           <Card>
@@ -684,19 +786,14 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
           <Card>
             <CardContent className="p-4">
               <h3 className="font-semibold text-gray-900 mb-3">Notes</h3>
-              {isEditing ? (
-                <textarea
-                  value={book.notes}
-                  onChange={(e) => handleNotesChange(e.target.value)}
-                  className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  rows={4}
-                  placeholder="Add your thoughts about this book..."
-                />
-              ) : (
-                <p className="text-gray-700 text-sm leading-relaxed">
-                  {book.notes || 'No notes added yet.'}
-                </p>
-              )}
+              <textarea
+                value={book.notes || ''}
+                onChange={(e) => handleNotesChange(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                rows={4}
+                placeholder="Add your thoughts about this book..."
+                readOnly={!isEditing}
+              />
             </CardContent>
           </Card>
 
