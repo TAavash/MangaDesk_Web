@@ -5,6 +5,7 @@ import { StatusBar } from '../../components/StatusBar/StatusBar';
 import { Card, CardContent } from '../../components/ui/card';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../hooks/useAuth';
+import { ChangePasswordModal } from '../../components/ChangePasswordModal/ChangePasswordModal';
 
 interface AdminProps {
   onBack: () => void;
@@ -35,6 +36,7 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
   const [activeTab, setActiveTab] = useState<'overview' | 'users' | 'books' | 'analytics'>('overview');
   const [users, setUsers] = useState<any[]>([]);
   const [books, setBooks] = useState<any[]>([]);
+  const [showChangePassword, setShowChangePassword] = useState(false);
 
   // Check if user is admin
   const [isAdmin, setIsAdmin] = useState(false);
@@ -379,6 +381,19 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
             <div className="space-y-4">
               <Card>
                 <CardContent className="p-4">
+                  <h3 className="font-semibold text-gray-900 dark:text-white mb-3">Admin Actions</h3>
+                  <Button
+                    onClick={() => setShowChangePassword(true)}
+                    className="w-full mb-2"
+                    variant="outline"
+                  >
+                    Change Password
+                  </Button>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardContent className="p-4">
                   <h3 className="font-semibold text-gray-900 mb-3">Platform Statistics</h3>
                   <div className="space-y-3">
                     <div className="flex justify-between items-center">
@@ -443,6 +458,12 @@ export const Admin: React.FC<AdminProps> = ({ onBack }) => {
         <div className="flex justify-center py-2">
           <div className="w-32 h-1 bg-black rounded-full" />
         </div>
+
+        {/* Change Password Modal */}
+        <ChangePasswordModal
+          isOpen={showChangePassword}
+          onClose={() => setShowChangePassword(false)}
+        />
       </div>
     </div>
   );

@@ -12,7 +12,10 @@ export const useFolders = () => {
 
   // Fetch folders from Supabase
   const fetchFolders = async () => {
-    if (!user) return;
+    if (!user) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);

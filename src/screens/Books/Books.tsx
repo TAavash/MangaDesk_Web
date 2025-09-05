@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
 import { ArrowLeft, Plus, Filter, BookOpen } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '../../components/ui/button';
 import { StatusBar } from '../../components/StatusBar/StatusBar';
 import { SearchBar } from '../../components/SearchBar/SearchBar';
 import { BookCard } from '../../components/BookCard/BookCard';
 import { AddBookModal } from '../../components/AddBookModal/AddBookModal';
+import { BookManagementModal } from '../../components/BookManagementModal/BookManagementModal';
 import { useBooks } from '../../hooks/useBooks';
+import { useFolders } from '../../hooks/useFolders';
 
 interface BooksProps {
   folderId: string;
@@ -26,11 +29,17 @@ export const Books: React.FC<BooksProps> = ({
     setSearchQuery,
     filterStatus,
     setFilterStatus,
-    addBook
+    addBook,
+    moveBook,
+    copyBook
   } = useBooks(folderId);
 
+  const { folders } = useFolders();
   const [showFilters, setShowFilters] = useState(false);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showManagementModal, setShowManagementModal] = useState(false);
+  const [selectedBookId, setSelectedBookId] = useState<string | null>(null);
+  const [managementMode, setManagementMode] = useState(false);
 
   const statusOptions = [
     { value: 'all', label: 'All Books' },
@@ -43,6 +52,27 @@ export const Books: React.FC<BooksProps> = ({
   const getStatusCount = (status: string) => {
     if (status === 'all') return books.length;
     return books.filter(book => book.status === status).length;
+  };
+
+  const handleBookManagement = (bookId: string, action: 'move' | 'copy') => {
+    setSelectedBookId(bookId);
+    setShowManagementModal(true);
+  };
+
+  const handleMoveBook = async (targetFolderId: string) => {
+    if (selectedBookId) {
+      await moveBook(selectedBookId, targetFolderId);
+      setShowManagementModal(false);
+      setSelectedBookId(null);
+    }
+  };
+
+  const handleCopyBook = async (targetFolderId: string) => {
+    if (selectedBookId) {
+      await copyBook(selectedBookId, targetFolderId);
+      setShowManagementModal(false);
+      setSelectedBookId(null);
+    }
   };
 
   return (
@@ -67,6 +97,14 @@ export const Books: React.FC<BooksProps> = ({
                 <p className="text-sm text-gray-500">{books.length} books</p>
               </div>
             </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setManagementMode(!managementMode)}
+              className="h-8 w-8 p-0"
+            >
+              {managementMode ? 'Done' : 'Manage'}
+            </Button>
             <Button
               variant="ghost"
               size="sm"
@@ -122,11 +160,32 @@ export const Books: React.FC<BooksProps> = ({
             </div>
           ) : (
             books.map((book) => (
-              <BookCard
-                key={book.id}
-                book={book}
-                onClick={() => onBookClick(book.id)}
-              />
+              <div key={book.id} className="relative">
+                <BookCard
+                  book={book}
+                  onClick={() => !managementMode && onBookClick(book.id)}
+                />
+                {managementMode && (
+                  <div className="absolute top-2 right-2 flex gap-1">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleBookManagement(book.id, 'move')}
+                      className="h-6 px-2 text-xs"
+                    >
+                      Move
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleBookManagement(book.id, 'copy')}
+                      className="h-6 px-2 text-xs"
+                    >
+                      Copy
+                    </Button>
+                  </div>
+                )}
+              </div>
             ))
           )}
         </div>
@@ -154,6 +213,18 @@ export const Books: React.FC<BooksProps> = ({
         onClose={() => setShowAddModal(false)}
         onAdd={addBook}
         folderId={folderId}
+      />
+
+      {/* Book Management Modal */}
+      <BookManagementModal
+        isOpen={showManagementModal}
+        onClose={() => {
+          setShowManagementModal(false);
+          setSelectedBookId(null);
+        }}
+        folders={folders.filter(f => f.id !== folderId)}
+        onMove={handleMoveBook}
+        onCopy={handleCopyBook}
       />
     </div>
   );

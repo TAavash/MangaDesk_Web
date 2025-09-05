@@ -5,6 +5,7 @@ import { StatusBar } from '../../components/StatusBar/StatusBar';
 import { Card, CardContent } from '../../components/ui/card';
 import { useAuth } from '../../hooks/useAuth';
 import { useTheme } from '../../hooks/useTheme';
+import { ChangePasswordModal } from '../../components/ChangePasswordModal/ChangePasswordModal';
 
 interface SettingsProps {
   onBack: () => void;
@@ -15,6 +16,7 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   const { theme, toggleTheme } = useTheme();
   const [showThemeOptions, setShowThemeOptions] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showChangePassword, setShowChangePassword] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const handleSignOut = async () => {
@@ -35,6 +37,10 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
   const handleProfile = () => {
     // TODO: Implement profile editing
     alert('Profile editing will be implemented soon!');
+  };
+
+  const handleChangePassword = () => {
+    setShowChangePassword(true);
   };
 
   return (
@@ -74,6 +80,20 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
                     <div className="flex-1">
                       <h3 className="font-medium text-gray-900">Profile</h3>
                       <p className="text-sm text-gray-500">{user?.email || 'Manage your account'}</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card className="hover:shadow-sm transition-shadow cursor-pointer" onClick={handleChangePassword}>
+                <CardContent className="p-0">
+                  <div className="flex items-center gap-3 p-4">
+                    <div className="w-8 h-8 bg-gray-100 dark:bg-gray-800 rounded-lg flex items-center justify-center">
+                      <User className="w-4 h-4 text-gray-600 dark:text-gray-300" />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-medium text-gray-900 dark:text-white">Change Password</h3>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">Update your password</p>
                     </div>
                   </div>
                 </CardContent>
@@ -240,6 +260,12 @@ export const Settings: React.FC<SettingsProps> = ({ onBack }) => {
           <div className="w-32 h-1 bg-black rounded-full" />
         </div>
       </div>
+
+      {/* Change Password Modal */}
+      <ChangePasswordModal
+        isOpen={showChangePassword}
+        onClose={() => setShowChangePassword(false)}
+      />
     </div>
   );
 };

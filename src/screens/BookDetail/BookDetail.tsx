@@ -179,6 +179,30 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
     setIsEditingCover(true);
   };
 
+  const handleCoverFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        alert('Please select an image file');
+        return;
+      }
+      
+      // Validate file size (max 5MB)
+      if (file.size > 5 * 1024 * 1024) {
+        alert('Image size must be less than 5MB');
+        return;
+      }
+      
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const result = e.target?.result as string;
+        setTempCoverUrl(result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   const saveCover = () => {
     updateBook(book.id, { coverUrl: tempCoverUrl || undefined });
     setIsEditingCover(false);
@@ -250,18 +274,26 @@ export const BookDetail: React.FC<BookDetailProps> = ({ bookId, folderId, onBack
             <div className="w-20 h-28 bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 relative group">
               {isEditingCover ? (
                 <div className="w-full h-full flex flex-col">
-                  <input
-                    type="url"
-                    value={tempCoverUrl}
-                    onChange={(e) => setTempCoverUrl(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') saveCover();
-                      if (e.key === 'Escape') cancelCoverEdit();
-                    }}
-                    className="w-full px-1 py-1 text-xs border border-blue-500 rounded focus:outline-none"
-                    placeholder="Image URL..."
-                    autoFocus
-                  />
+                  <div className="space-y-1">
+                    <input
+                      type="url"
+                      value={tempCoverUrl}
+                      onChange={(e) => setTempCoverUrl(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') saveCover();
+                        if (e.key === 'Escape') cancelCoverEdit();
+                      }}
+                      className="w-full px-1 py-1 text-xs border border-blue-500 rounded focus:outline-none"
+                      placeholder="Image URL..."
+                      autoFocus
+                    />
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleCoverFileUpload}
+                      className="w-full text-xs"
+                    />
+                  </div>
                   <div className="flex gap-1 mt-1">
                     <Button
                       variant="ghost"

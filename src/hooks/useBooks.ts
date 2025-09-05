@@ -12,7 +12,10 @@ export const useBooks = (folderId: string) => {
 
   // Fetch books from Supabase
   const fetchBooks = async () => {
-    if (!user || !folderId) return;
+    if (!user || !folderId) {
+      setLoading(false);
+      return;
+    }
 
     try {
       setLoading(true);
@@ -26,13 +29,13 @@ export const useBooks = (folderId: string) => {
       if (error) throw error;
 
       // Transform database data to match our Book interface
-      const transformedBooks: Book[] = data.map(book => ({
+      const transformedBooks: Book[] = (data || []).map(book => ({
         id: book.id,
         title: book.title,
         author: book.author || undefined,
         status: book.status,
-        progress: book.progress,
-        totalChapters: book.total_chapters,
+        progress: book.progress || 0,
+        totalChapters: book.total_chapters || 1,
         folderId: book.folder_id,
         coverUrl: book.cover_url || undefined,
         rating: book.rating || undefined,
@@ -46,7 +49,7 @@ export const useBooks = (folderId: string) => {
         startDate: book.start_date || undefined,
         finishDate: book.finish_date || undefined,
         lastRead: book.last_read || undefined,
-        favorite: book.favorite,
+        favorite: book.favorite || false,
         dateAdded: book.created_at.split('T')[0]
       }));
 
@@ -110,8 +113,8 @@ export const useBooks = (folderId: string) => {
         title: data.title,
         author: data.author || undefined,
         status: data.status,
-        progress: data.progress,
-        totalChapters: data.total_chapters,
+        progress: data.progress || 0,
+        totalChapters: data.total_chapters || 1,
         folderId: data.folder_id,
         coverUrl: data.cover_url || undefined,
         rating: data.rating || undefined,
@@ -125,7 +128,7 @@ export const useBooks = (folderId: string) => {
         startDate: data.start_date || undefined,
         finishDate: data.finish_date || undefined,
         lastRead: data.last_read || undefined,
-        favorite: data.favorite,
+        favorite: data.favorite || false,
         dateAdded: data.created_at.split('T')[0]
       };
 
@@ -192,6 +195,103 @@ export const useBooks = (folderId: string) => {
     }
   };
 
+  const moveBook = async (bookId: string, targetFolderId: string) => {
+    if (!user) return;
+
+    try {
+      const book = books.find(b => b.id === bookId);
+      if (!book) return;
+
+      // Record the move
+      await supabase
+        .from('book_moves')
+        .insert([
+          {
+            book_id: bookId,
+            from_folder_id: book.folderId,
+            to_folder_id: targetFolderId,
+            user_id: user.id,
+            move_type: 'move'
+          }
+        ]);
+
+      // Update the book
+      const { error } = await supabase
+        .from('books')
+        .update({
+          folder_id: targetFolderId,
+          moved_from_folder: book.folderId,
+          moved_at: new Date().toISOString()
+        })
+        .eq('id', bookId)
+        .eq('user_id', user.id);
+
+      if (error) throw error;
+
+      // Remove from current list
+      setBooks(prev => prev.filter(b => b.id !== bookId));
+    } catch (error) {
+      console.error('Error moving book:', error);
+    }
+  };
+
+  const copyBook = async (bookId: string, targetFolderId: string) => {
+    if (!user) return;
+
+    try {
+      const book = books.find(b => b.id === bookId);
+      if (!book) return;
+
+      // Create a copy
+      const { data, error } = await supabase
+        .from('books')
+        .insert([
+          {
+            title: book.title,
+            author: book.author || null,
+            status: book.status,
+            progress: book.progress,
+            total_chapters: book.totalChapters,
+            folder_id: targetFolderId,
+            user_id: user.id,
+            cover_url: book.coverUrl || null,
+            rating: book.rating || null,
+            notes: book.notes || null,
+            synopsis: book.synopsis || null,
+            genre: book.genre || null,
+            tags: book.tags || null,
+            year: book.year || null,
+            publisher: book.publisher || null,
+            language: book.language,
+            start_date: book.startDate || null,
+            finish_date: book.finishDate || null,
+            last_read: book.lastRead || null,
+            favorite: book.favorite
+          }
+        ])
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      // Record the copy
+      await supabase
+        .from('book_moves')
+        .insert([
+          {
+            book_id: data.id,
+            from_folder_id: book.folderId,
+            to_folder_id: targetFolderId,
+            user_id: user.id,
+            move_type: 'copy'
+          }
+        ]);
+
+    } catch (error) {
+      console.error('Error copying book:', error);
+    }
+  };
+
   // Get a single book by ID
   const getBook = (bookId: string): Book | undefined => {
     return books.find(book => book.id === bookId);
@@ -206,6 +306,8 @@ export const useBooks = (folderId: string) => {
     addBook,
     updateBook,
     deleteBook,
+    moveBook,
+    copyBook,
     getBook,
     loading,
     refetch: fetchBooks
